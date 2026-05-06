@@ -21,3 +21,10 @@ venv.bak/
 # Logs
 logs/
 *.log
+
+# Data and Models
+*.csv
+data/
+lightning_logs/
+*.ckpt
+*.pth

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Fake News Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob red"></div>
+        <div class="blob blue"></div>
+    </div>
+
+    <!-- History Panel -->
+    <aside id="history-panel" class="history-panel">
+        <div class="history-header">
+            <h2>Scan History</h2>
+            <button id="close-history" class="btn-icon">✖</button>
+        </div>
+        <div id="history-list" class="history-list">
+            <!-- Populated via JS -->
+        </div>
+    </aside>
+
+    <div class="container">
+        <header>
+            <div class="header-controls">
+                <button id="theme-toggle" class="btn-icon">☀️ Light Mode</button>
+                <button id="intel-toggle" class="btn-icon" style="color:var(--warning); border-color:var(--warning);">🌐 Intelligence Hub</button>
+                <button id="history-toggle" class="btn-icon">🕒 History</button>
+                <button id="settings-toggle" class="btn-icon">⚙️ Settings</button>
+            </div>
+            <h1>Fake News Detector 🚨</h1>
+            <p>Multimodal AI powered by Text, Vision, Metadata, and Live DDGS Corroboration</p>
+        </header>
+
+        <main id="main-grid">
+            <div class="card input-section" id="drop-zone">
+                <h2>Article Details <span class="drag-hint">(Drag & Drop supported)</span></h2>
+                <form id="predict-form">
+                    <div class="form-group animate-stagger delay-1">
+                        <label for="article-text">Article Text</label>
+                        <textarea id="article-text" placeholder="Paste or drag the suspect news article here..." required>Breaking: Local hero saves cats from tree.</textarea>
+                    </div>
+
+                    <div class="form-group animate-stagger delay-3">
+                        <label for="image-upload" class="file-upload-label">
+                            <span class="btn-secondary">Upload Media (Img/Video)</span>
+                            <input type="file" id="image-upload" accept="image/jpeg, image/png, video/mp4, video/webm">
+                        </label>
+                        <span id="file-name">No file chosen</span>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="btn-primary animate-stagger delay-4">Check Authenticity</button>
+                </form>
+            </div>
+
+            <!-- 3D Flip Card Container -->
+            <div class="card-container" id="result-container" style="display: none;">
+                <div class="flip-card" id="flip-card">
+                    
+                    <!-- FRONT: Quick Verdict -->
+                    <div class="card flip-front result-section">
+                        <h2>Quick Verdict</h2>
+                        
+                        <div class="loading" id="loading-spinner" style="display: none;">
+                            <div class="scanner-container">
+                                <div class="scanner-laser"></div>
+                            </div>
+                            <p id="loading-text">Analyzing text...</p>
+                        </div>
+
+                        <div id="result-content" style="display: none;">
+                            <div class="verdict-banner" id="verdict-banner">
+                                <h1 id="verdict-text">REAL</h1>
+                            </div>
+
+                            <div class="stat-box">
+                                <span>Fake Probability</span>
+                                <h3 id="prob-text">0.00%</h3>
+                                <div class="progress-bar"><div class="progress-fill" id="prob-fill"></div></div>
+                            </div>
+
+                            <div class="sources-box" id="sources-container">
+                                <h3><span id="sources-count" class="badge">0</span> Corroborating Sources Found</h3>
+                                <div class="sources-list" id="sources-list"></div>
+                            </div>
+
+                            <!-- Community Notes -->
+                            <div id="community-notes-container" style="display:none; margin-top: 1rem; text-align: left;">
+                                <div class="community-header">🌍 Community Fact-Check</div>
+                                <div id="community-notes-list"></div>
+                            </div>
+
+                            <button type="button" id="btn-detailed" class="btn-secondary flip-trigger mt-1">View Detailed Explanation 🔄</button>
+                        </div>
+                    </div>
+
+                    <!-- BACK: Detailed Explanation -->
+                    <div class="card flip-back result-section">
+                        <h2>Detailed Explanation</h2>
+                        
+                        <div class="explain-box">
+                            <h3>Contribution Breakdown</h3>
+                            <div class="contribution-chart">
+                                <div class="bar-segment text-segment" id="seg-text" style="width:0%;">Text</div>
+                                <div class="bar-segment img-segment" id="seg-img" style="width:0%;">Image</div>
+                                <div class="bar-segment meta-segment" id="seg-meta" style="width:0%;">Meta</div>
+                            </div>
+                            <div class="legend">
+                                <span><span class="dot dot-text"></span> Text: <span id="val-text">0</span>%</span>
+                                <span><span class="dot dot-img"></span> Image: <span id="val-img">0</span>%</span>
+                                <span><span class="dot dot-meta"></span> Meta: <span id="val-meta">0</span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="explain-box mt-1">
+                            <h3>Bias & Media Analysis</h3>
+                            <div class="bias-meter-container">
+                                <div class="bias-labels"><span>Left / Safe</span><span>Right / Sensational</span></div>
+                                <div class="bias-track">
+                                    <div class="bias-indicator" id="bias-indicator" style="left:50%;"></div>
+                                </div>
+                            </div>
+                            <p id="media-auth-text" class="highlight-text mt-1" style="font-weight: bold;"></p>
+                        </div>
+
+                        <div class="explain-box mt-1">
+                            <h3>AI Highlights</h3>
+                            <p id="ai-highlights" class="highlight-text">Loading...</p>
+                        </div>
+                        
+                        <button type="button" id="btn-quick" class="btn-secondary flip-trigger mt-1">Back to Quick Verdict 🔄</button>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal Overlay -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2>⚙️ Application Settings</h2>
+                <button type="button" id="close-settings" class="btn-icon">✖</button>
+            </div>
+            <div class="settings-body">
+                <h3>Score Adjustment Controls</h3>
+                <div class="form-group">
+                    <label>Min Acceptable Credibility Threshold: <span id="set-cred-val">0.50</span></label>
+                    <input type="range" id="set-cred" min="0" max="1" step="0.05" value="0.50">
+                </div>
+                <div class="form-group">
+                    <label>Weight: Author Cred vs Domain Rep</label>
+                    <div class="weight-labels"><span>Author</span><span>Domain</span></div>
+                    <input type="range" id="set-weight" min="0" max="1" step="0.1" value="0.5">
+                </div>
+
+                <h3 class="mt-1">Sensitivity & Alerts</h3>
+                <div class="toggle-group mt-1">
+                    <label class="switch">
+                        <input type="checkbox" id="set-push">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Enable Push Alerts for Suspicious Content</span>
+                </div>
+                <div class="toggle-group mt-1">
+                    <label class="switch">
+                        <input type="checkbox" id="set-email">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Enable Email Alerts</span>
+                </div>
+
+                <h3 class="mt-1">Customization</h3>
+                <div class="form-group mt-1">
+                    <label>Language Preference</label>
+                    <select id="set-lang" class="custom-select">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Default Report Detail</label>
+                    <select id="set-detail" class="custom-select">
+                        <option value="quick">Quick Verdict Only</option>
+                        <option value="full">Full Breakdown</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" id="save-settings" class="btn-primary">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Intelligence Hub Modal -->
+    <div id="intel-modal" class="modal-overlay">
+        <div class="modal-content card" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>🌐 Global Intelligence Hub</h2>
+                <button type="button" id="close-intel" class="btn-icon">✖</button>
+            </div>
+            <div class="settings-body" style="display: flex; gap: 2rem;">
+                
+                <div style="flex: 1;">
+                    <h3>Source Lineage Timeline</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="time-dot"></div>
+                            <div class="time-content">
+                                <strong>Origin Found</strong>
+                                <p>First seen on 4chan.org 3 days ago.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-dot"></div>
+                            <div class="time-content">
+                                <strong>Amplification</strong>
+                                <p>Bot network shared 15,000 times on X.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-dot" style="background: var(--danger);"></div>
+                            <div class="time-content">
+                                <strong>Current Node</strong>
+                                <p>Now detected on uploaded URL/Text.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="flex: 1;">
+                    <h3>Trust Network Graph</h3>
+                    <div class="network-graph" id="trust-network">
+                        <!-- Pure CSS Nodes -->
+                        <div class="node origin" style="top: 20%; left: 50%;">Source</div>
+                        <div class="node fake" style="top: 50%; left: 20%;">Bot 1</div>
+                        <div class="node fake" style="top: 80%; left: 30%;">Bot 2</div>
+                        <div class="node credible" style="top: 60%; left: 80%;">Snopes</div>
+                        <svg class="network-lines">
+                            <line x1="50%" y1="20%" x2="20%" y2="50%" stroke="var(--danger)" stroke-width="2"/>
+                            <line x1="20%" y1="50%" x2="30%" y2="80%" stroke="var(--danger)" stroke-width="2"/>
+                            <line x1="50%" y1="20%" x2="80%" y2="60%" stroke="var(--success)" stroke-width="2" stroke-dasharray="5,5"/>
+                        </svg>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:1rem;">Graph simulated via heuristics. Real-time graph database disconnected.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
